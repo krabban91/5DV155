@@ -1,17 +1,36 @@
 package com.example.gabriel.greed;
 
+import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 
 public class Greed extends ActionBarActivity {
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onDestroy(){
+
+    }
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_greed);
+
+        final ImageButton button = (ImageButton) findViewById(R.id.imageButton00);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final TextView text = (TextView) findViewById(R.id.scoreValue);
+                text.setText("\t Oboy..: "+Math.random()*100);
+            }
+        });
     }
 
     @Override
