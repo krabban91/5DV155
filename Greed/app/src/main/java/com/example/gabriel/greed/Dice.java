@@ -23,6 +23,11 @@ public class Dice {
         this.selected = selected;
         return true;
     }
+
+    public boolean toggleSelected(){
+        return setSelected(!isSelected());
+    }
+
     public void setActive(boolean active){
         this.active = active;
     }

@@ -16,8 +16,20 @@ public class GreedPlayer {
         }
     }
 
+    public boolean isDiceSelected(int i){
+        return dices[i].isSelected();
+    }
+
+    public boolean isDiceActive(int i){
+        return dices[i].isActive();
+    }
+
     public boolean selectDice(int i){
         return dices[i].setSelected(true);
+    }
+
+    public boolean toggleDiceSelected(int i) {
+        return dices[i].toggleSelected();
     }
 
     public Dice[] getDices(){

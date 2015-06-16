@@ -52,11 +52,14 @@
 
             <Button
                 android:text="Save"
-                android:enabled="false"/>
+                android:enabled="false"
+                android:id="@+id/greed_save"/>
             <Button
-                android:text="Score"/>
+                android:text="Score"
+                android:id="@+id/greed_score"/>
             <Button
-                android:text="Throw"/>
+                android:text="Throw"
+                android:id="@+id/greed_throw"/>
         </GridLayout>
 
 

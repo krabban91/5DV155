@@ -2,5 +2,7 @@
     <string name="app_name">Greed</string>
 
     <string name="hello_world">Hello world!</string>
+    <string name="action_new_game">New Game</string>
+    <string name="title_activity_add_players">AddPlayers</string>
     <string name="action_settings">Settings</string>
 </resources>
