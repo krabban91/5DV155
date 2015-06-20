@@ -1,0 +1,113 @@
+#portalMessageContainer1_2{
+    z-index:3000;
+    height:auto;
+    position:fixed;
+    top:0;
+    left:30%;
+    right:30%;
+}
+#portalMessageContainer3{
+    z-index:3000;
+    height:auto;
+    position:fixed;
+    bottom:0;
+    left:30%;
+    right:30%;
+}
+.portalMessage{
+    padding:10px;
+    color:#fff;
+    margin-top:1px;
+    padding:10px 25px 10px 10px;
+    position:relative;
+    font-size:90% !important;
+    -moz-box-shadow: 3px 3px 4px #000;
+    -webkit-box-shadow: 3px 3px 4px #000;
+    box-shadow: 3px 3px 4px #000;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+
+}
+#portalMessageContainer1_2 .portalMessage:last-child{
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    -moz-border-radius-bottomright: 5px;
+    -moz-border-radius-bottomleft: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+}    
+#portalMessageContainer3 .portalMessage:first-child{
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    }
+.portalMessagePriority1{
+    background:#c00;
+}
+.portalMessagePriority2{
+    background:#888;
+}
+.portalMessagePriority3{
+    background:green;
+}
+.portalMessage .dismissLink, .portalMessage .minimLink{ 
+    height:20px;
+    width:20px;
+    position:absolute;
+    top:5px;
+    right:5px;
+}
+.portalMessage .dismissLink a, .portalMessage .minimLink a{
+    display:block;
+    border:1px solid #fff;
+    padding:2px;
+    text-align: center;
+    background:#fff;
+    color:#transparent;
+    text-decoration: none;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+.portalMessage .dismissLink a:hover, .portalMessage .minimLink a:hover{
+    background:transparent;
+    color:#fff;
+}
+#portalMessageMinimContainer{
+    position:fixed;
+    width:100%;
+    bottom:0 !important;
+    right:0 !important;
+}
+#portalMessageMinimContainer .portalMessage{ 
+    width:2em !important;
+    height:1.5em;
+    float:right;
+    overflow:hidden;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    -webkit-border-bottom-right-radius: 0;
+    -webkit-border-bottom-left-radius: 0;
+    -moz-border-radius-bottomright: 0;
+    -moz-border-radius-bottomleft: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding:3px;
+}
+.messageHolder{
+    display:block;
+}
+.messageHolder a{
+    color:#fff;
+    }
+#portalMessageMinimContainer .portalMessage .messageHolder{
+    color:#c00;
+    display:none
+    }

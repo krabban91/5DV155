@@ -5,4 +5,8 @@
     <string name="action_new_game">New Game</string>
     <string name="title_activity_add_players">AddPlayers</string>
     <string name="action_settings">Settings</string>
+    <string name="currentplayer">Current player is: </string>
+    <string name="currentscore">Score for this round: </string>
+    <string name="currenttotalscore">(total score): </string>
+
 </resources>
