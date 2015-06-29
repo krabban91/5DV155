@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -9,23 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="30sp"
-            android:paddingBottom="20sp"
-            android:text="New Game"
-            android:textSize="30sp"
-            />
-
         <ListView
             android:layout_width="match_parent"
             android:layout_height="300sp"
-            android:id="@+id/nameListView"
-            android:layout_weight="0.06" >
-
+            android:layout_weight="5"
+            android:id="@+id/nameListView" >
         </ListView>
-
         <LinearLayout
             android:paddingTop="10sp"
             android:orientation="horizontal"
@@ -51,7 +41,6 @@
                 android:id="@+id/addPlayer_buttonRemove"
                 android:layout_weight="0.001" />
         </LinearLayout>
-
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -59,4 +48,5 @@
             android:text="Start playing"
             android:id="@+id/addPlayer_start"/>
     </LinearLayout>
+
 </RelativeLayout>

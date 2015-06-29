@@ -1,6 +1,5 @@
 package com.example.gabriel.greed;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -9,38 +8,69 @@ import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 
+/**
+ * Activity used to find out who that is playing.
+ */
 public class AddPlayers extends ActionBarActivity{
-    private ArrayList<String> names = new ArrayList<>();
     private ArrayAdapter<String> adapter;
     private Button addB, remB, startGame;
     private EditText editName;
+    private ListView nameList;
+
+    private ArrayList<String> names = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_players);
-        ListView l = (ListView)findViewById(R.id.nameListView);
+
+
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_add_players, menu);
+        return true;
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void initiateComponents(){
+        //Initialize components.
+        nameList = (ListView)findViewById(R.id.nameListView);
         addB = (Button)findViewById(R.id.addPlayer_button);
         remB = (Button)findViewById(R.id.addPlayer_buttonRemove);
         startGame = (Button)findViewById(R.id.addPlayer_start);
         editName = (EditText)findViewById(R.id.addPlayer_editText);
+
         addB.setEnabled(false);
         remB.setEnabled(false);
         startGame.setEnabled(false);
         adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, names);
-        l.setAdapter(adapter);
+        nameList.setAdapter(adapter);
 
         addB.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,34 +122,10 @@ public class AddPlayers extends ActionBarActivity{
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), Greed.class);
                 LinkedList<GreedPlayer> players = new LinkedList<GreedPlayer>();
-                intent.putExtra("Players",names);
+                intent.putExtra(getString(R.string.intent_players),names);
 
                 startActivity(intent);
             }
         });
-    }
-
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_players, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

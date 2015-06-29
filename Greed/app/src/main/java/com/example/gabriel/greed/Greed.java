@@ -7,21 +7,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-
 
 
 public class Greed extends ActionBarActivity {
+    //Graphical items.
+    private static Toast toast;
+    private Button[] diceButtons = new Button[6];
+    private Button saveButton, scoreButton, throwButton;
+    private TextView playerLabel, currentScoreLabel, totalScoreLabel;
 
-    private LinkedList<GreedPlayer> players;
-    private GreedPlayer currentPlayer;
-    private Button[] dices = new Button[6];
-    private Button saveB,scoreB, throwB;
-    private TextView playerLabel, currentScore, totalScore, information;
+    // The game model
+    private GreedModel gameModel;
 
     @Override
     protected void onDestroy(){
@@ -32,212 +32,25 @@ public class Greed extends ActionBarActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_greed);
-        initiateButtons();
-
-        System.out.println("wth. " + savedInstanceState);
-        System.out.println("wth. "+getIntent().getExtras());
+        initiateComponents();
         ArrayList<String> names = null;
         //Handle the players retrieved from addplayers.
         if(getIntent().getExtras()!=null) {
-            System.out.println("something there");
-            names = getIntent().getExtras().getStringArrayList("Players");
+            names = getIntent().getExtras().getStringArrayList(getString(R.string.intent_players));
         }
-        players = new LinkedList<>();
-        if(names == null){
-            //...
 
-            System.out.println("Nothing there");
-        } else if(names.size() != 0){
+        try{
+            this.gameModel = new GreedModel(names, 300);
 
-            for(String n : names){
-                players.add(new GreedPlayer(n));
-            }
-            currentPlayer = players.get(0);
-            System.out.println("players " + players.size());
             addListeners();
             updateInformation();
             updateDices();
-            information.setText("The game has begun");
+            showToast(R.string.game_start);
+        }catch(IllegalArgumentException iaE){
+            // When this hits: click "New Game" again
         }
+        prepareButtons();
     }
-
-    private void initiateButtons(){
-        // buttons
-        playerLabel = (TextView) findViewById(R.id.playerValue);
-        currentScore = (TextView) findViewById(R.id.scoreValue);
-        totalScore = (TextView) findViewById(R.id.totalscoreValue);
-        information = (TextView) findViewById(R.id.greed_information);
-        dices[0] = (Button) findViewById(R.id.imageButton00);
-        dices[1] = (Button) findViewById(R.id.imageButton01);
-        dices[2] = (Button) findViewById(R.id.imageButton02);
-        dices[3] = (Button) findViewById(R.id.imageButton10);
-        dices[4] = (Button) findViewById(R.id.imageButton11);
-        dices[5] = (Button) findViewById(R.id.imageButton12);
-        saveB  = (Button) findViewById(R.id.greed_save);
-        scoreB = (Button) findViewById(R.id.greed_score);
-        throwB = (Button) findViewById(R.id.greed_throw);
-        setEnabledScoreSelection(false);
-        saveB.setEnabled(false);
-        throwB.setEnabled(true);
-        // labels
-    }
-
-    private void addListeners(){
-
-        dices[0].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentPlayer.toggleDiceSelected(0);
-                dices[0].setBackgroundResource(currentPlayer.getImgNoForDice(0));
-            }
-        });
-
-        dices[1].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentPlayer.toggleDiceSelected(1);
-                dices[1].setBackgroundResource(currentPlayer.getImgNoForDice(1));
-            }
-        });
-        dices[2].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentPlayer.toggleDiceSelected(2);
-                dices[2].setBackgroundResource(currentPlayer.getImgNoForDice(2));
-            }
-        });
-        dices[3].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentPlayer.toggleDiceSelected(3);
-                dices[3].setBackgroundResource(currentPlayer.getImgNoForDice(3));
-            }
-        });
-        dices[4].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentPlayer.toggleDiceSelected(4);
-                dices[4].setBackgroundResource(currentPlayer.getImgNoForDice(4));
-            }
-        });
-        dices[5].setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentPlayer.toggleDiceSelected(5);
-                dices[5].setBackgroundResource(currentPlayer.getImgNoForDice(5));
-            }
-        });
-
-        saveB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Save score.
-                GreedPlayer p = currentPlayer;
-                p.endRound();
-                if(p.getTotalScore()>=10000){
-                    information.setText("Game Over! "+p.getName()+" won with "+
-                            p.getTotalScore()+"points.");
-                    throwB.setEnabled(false);
-                }else{
-                    information.setText("Round ended. "+p.getName()+" now has " +
-                            p.getTotalScore() +" points");
-                    //Next player.
-                    nextPlayer();
-                    currentPlayer.startRound();
-                    updateInformation();
-                    throwB.setEnabled(true);
-                }
-                saveB.setEnabled(false);
-                setEnabledScoreSelection(false);
-            }
-        });
-
-        scoreB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int val = currentPlayer.collectScore();
-                if (val < 0) {
-                    information.setText("That is an invalid move...");
-                    //invalid choice of dice
-                } else if (val == 0) {
-                    //round over
-                    information.setText("Round ended after failure.");
-                    //Toast
-                    currentPlayer.endRound();
-                    updateDices();
-                    //next player
-                    nextPlayer();
-                    currentPlayer.startRound();
-                    updateInformation();
-                    setEnabledScoreSelection(false);
-                    saveB.setEnabled(false);
-                    throwB.setEnabled(true);
-                } else {
-                    //good play. continue.
-                    //No dices left. Receive them again.
-                    if (!currentPlayer.hasDicesLeft(false)) {
-                        currentPlayer.turnDices(true);
-                        saveB.setEnabled(false);
-                        information.setText("Good job. " + val + "points and more dices.");
-                    } else if (currentPlayer.getCurrentRoundScore() >= 300) {
-                        saveB.setEnabled(true);
-                        information.setText("Good job." + val + "points");
-                    }
-                    throwB.setEnabled(true);
-                    updateInformation();
-                    updateDices();
-                    setEnabledScoreSelection(false);
-                }
-            }
-        });
-        throwB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                information.setText("Dices thrown.");
-                currentPlayer.rollDices();
-                throwB.setEnabled(false);
-                setEnabledScoreSelection(true);
-                saveB.setEnabled(false);
-                updateDices();
-            }
-        });
-    }
-
-    private void setEnabledScoreSelection(boolean enable){
-        scoreB.setEnabled(enable);
-        for (Button b : dices){
-            b.setEnabled(enable);
-        }
-    }
-
-    private  void updateDices(){
-        if(currentPlayer == null){
-            return;
-        }
-
-        dices[0].setBackgroundResource(currentPlayer.getImgNoForDice(0));
-        dices[1].setBackgroundResource(currentPlayer.getImgNoForDice(1));
-        dices[2].setBackgroundResource(currentPlayer.getImgNoForDice(2));
-        dices[3].setBackgroundResource(currentPlayer.getImgNoForDice(3));
-        dices[4].setBackgroundResource(currentPlayer.getImgNoForDice(4));
-        dices[5].setBackgroundResource(currentPlayer.getImgNoForDice(5));
-    }
-
-    private void updateInformation(){
-        if(currentPlayer == null){
-            return;
-        }
-        playerLabel.setText(""+currentPlayer.getName());
-        currentScore.setText(""+currentPlayer.getCurrentRoundScore());
-        totalScore.setText(""+currentPlayer.getTotalScore());
-    }
-
-    private void nextPlayer(){
-        int i = players.indexOf(currentPlayer);
-        currentPlayer = players.get((i+1)%players.size());
-    }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -245,6 +58,8 @@ public class Greed extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.menu_greed, menu);
         return true;
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -257,10 +72,186 @@ public class Greed extends ActionBarActivity {
         if (id == R.id.new_game_button) {
             Intent intent = new Intent(this, AddPlayers.class);
             startActivity(intent);
-
             return true;
         }
 
+
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Takes a String resource id and writes a short toast of it.
+     * @param resid an int referring to an action string resource.
+     */
+    private void showToast(int resid){
+        String s = getString(resid);
+        showToast(s);
+    }
+
+    /**
+     * Takes a String and writes a short toast of it.
+     * @param s The String to show
+     */
+    private void showToast(String s){
+        if(s == null){ return; }
+
+        if(Greed.toast!= null){
+            Greed.toast.cancel();
+        }
+
+        Greed.toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
+
+        Greed.toast.show();
+    }
+
+    /**
+     * Adds action listeners to buttons in the activity.
+     */
+    private void addListeners(){
+        for (int i = 0; i <diceButtons.length ; i++) {
+            diceButtons[i].setOnClickListener(new DiceClickListener(this.gameModel, i, diceButtons[i]));
+        }
+        saveButton.setOnClickListener(new OnSaveClickListener());
+
+        scoreButton.setOnClickListener(new OnScoreClickListener());
+
+        throwButton.setOnClickListener(new OnThrowClickListener());
+    }
+
+    /**
+     * Enables/disables buttons connected to score action.
+     * @param enable <tt>true</tt> if score is to be possible to collect.
+     */
+    private void setEnabledScoreSelection(boolean enable){
+        scoreButton.setEnabled(enable);
+        for (Button b : diceButtons){
+            b.setEnabled(enable);
+        }
+    }
+
+    /**
+     * Updates the background resource of all the dice buttons.
+     */
+    private  void updateDices(){
+        if(gameModel == null){
+            return;
+        }
+        for (int i = 0; i <diceButtons.length ; i++) {
+            diceButtons[i].setBackgroundResource(gameModel.getCurrentPlayer().getImgNoForDice(i));
+        }
+    }
+
+    /**
+     * Updates the name and score to the current.
+     */
+    private void updateInformation(){
+        if(gameModel == null){
+            return;
+        }
+        GreedPlayer p = gameModel.getCurrentPlayer();
+        playerLabel.setText(""+p.getName());
+        currentScoreLabel.setText("" + p.getCurrentRoundScore());
+        totalScoreLabel.setText("" + p.getScore());
+    }
+
+    /**
+     * Prepares the buttons for a game or not.
+     */
+    private void prepareButtons(){
+        // Enable/disable buttons
+        this.setEnabledScoreSelection(false);
+        this.saveButton.setEnabled(false);
+        this.throwButton.setEnabled(!(gameModel == null ||
+                gameModel.getState() == GreedModel.GreedEnum.GAMEOVER));
+    }
+
+    /*
+     * Connects the xml objects to variables.
+     */
+    private void initiateComponents(){
+        //labels
+        this.playerLabel = (TextView) findViewById(R.id.playerValue);
+        this.currentScoreLabel = (TextView) findViewById(R.id.scoreValue);
+        this.totalScoreLabel = (TextView) findViewById(R.id.totalscoreValue);
+        // -------------
+        // Dice buttons
+        this.diceButtons[0] = (Button) findViewById(R.id.imageButton00);
+        this.diceButtons[1] = (Button) findViewById(R.id.imageButton01);
+        this.diceButtons[2] = (Button) findViewById(R.id.imageButton02);
+        this.diceButtons[3] = (Button) findViewById(R.id.imageButton10);
+        this.diceButtons[4] = (Button) findViewById(R.id.imageButton11);
+        this.diceButtons[5] = (Button) findViewById(R.id.imageButton12);
+        // -------------
+        // Action buttons
+        this.saveButton = (Button) findViewById(R.id.greed_save);
+        this.scoreButton = (Button) findViewById(R.id.greed_score);
+        this.throwButton = (Button) findViewById(R.id.greed_throw);
+    }
+
+    /**
+     * A Listener specialized for a score button
+     */
+    private class OnScoreClickListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            String s = gameModel.scoreAction(getApplicationContext());
+            showToast(s);
+            switch (gameModel.getState()){
+                case INVALIDMOVE:
+                    //do nothing
+                    break;
+                case NEWPLAYER:
+                case CONTINUE:
+                case NEWDICE:
+                {
+                    saveButton.setEnabled(gameModel.playerCanSave());
+                    throwButton.setEnabled(true);
+                    updateInformation();
+                    updateDices();
+                    setEnabledScoreSelection(false);
+                    break;
+                }
+            }
+        }
+    }
+    /**
+     * A Listener specialized for a save button
+     */
+    private class OnSaveClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v){
+            String s = gameModel.saveAction(getApplicationContext());
+            showToast(s);
+            switch (gameModel.getState()) {
+                case GAMEOVER:
+                    throwButton.setEnabled(false);
+                    break;
+                case NEWPLAYER:
+                    throwButton.setEnabled(true);
+                    break;
+            }
+            saveButton.setEnabled(false);
+            setEnabledScoreSelection(false);
+            updateInformation();
+        }
+    }
+    /**
+     * A Listener specialized for a throw button
+     */
+    private class OnThrowClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            String s = gameModel.throwAction(getApplicationContext());
+            showToast(s);
+            switch (gameModel.getState()) {
+                case DICETHROWN:
+                    throwButton.setEnabled(false);
+                    setEnabledScoreSelection(true);
+                    saveButton.setEnabled(false);
+                    updateDices();
+                    break;
+            }
+        }
     }
 }
