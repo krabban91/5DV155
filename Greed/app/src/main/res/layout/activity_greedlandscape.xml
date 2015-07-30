@@ -1,0 +1,117 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:screenOrientation="portrait"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".Greed">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/informationText"
+        android:textStyle="bold"
+        android:textSize="@dimen/abc_text_size_title_material"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:columnCount="2">
+
+    <TextView android:text="@string/currentplayer" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewplayer"
+        android:paddingTop="10dp"
+        android:paddingRight="5dp"/>
+    <TextView
+        android:text="no player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/playerValue"
+        android:paddingTop="10dp"/>
+    <TextView android:text="@string/currentscore" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewScore"
+        android:paddingTop="10dp"
+        android:paddingRight="5dp"/>
+    <TextView android:text="no score" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scoreValue"
+        android:paddingTop="10dp"/>
+    <TextView android:text="@string/currenttotalscore" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewTotalScore"
+        android:paddingTop="5dp"
+        android:paddingRight="5dp"/>
+    <TextView android:text="no score" android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/totalscoreValue"
+        android:paddingTop="5dp"/>
+    </GridLayout>
+
+    <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:id="@+id/gridLayout"
+            android:rowCount="1"
+            android:columnCount="6"
+            android:layout_gravity="center"
+            >
+
+            <Button
+                android:background="@drawable/white1"
+                android:id="@+id/imageButton00"
+                android:layout_row="0"
+                android:layout_column="0"/>
+            <Button
+                android:background="@drawable/white2"
+                android:id="@+id/imageButton01"
+                android:layout_row="0"
+                android:layout_column="1" />
+            <Button
+                android:background="@drawable/white3"
+                android:id="@+id/imageButton02"
+                android:layout_row="0"
+                android:layout_column="2" />
+            <Button
+                android:background="@drawable/white4"
+                android:id="@+id/imageButton10"
+                android:layout_row="0"
+                android:layout_column="3" />
+            <Button
+                android:background="@drawable/white5"
+                android:id="@+id/imageButton11"
+                android:layout_row="0"
+                android:layout_column="4" />
+            <Button
+                android:background="@drawable/white6"
+                android:id="@+id/imageButton12"
+                android:layout_row="0"
+                android:layout_column="5" />
+        </GridLayout>
+    <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:text="Save"
+                android:enabled="false"
+                android:id="@+id/greed_save"/>
+            <Button
+                android:text="Score"
+                android:id="@+id/greed_score"/>
+            <Button
+                android:text="Throw"
+                android:id="@+id/greed_throw"/>
+        </GridLayout>
+
+
+
+</LinearLayout>

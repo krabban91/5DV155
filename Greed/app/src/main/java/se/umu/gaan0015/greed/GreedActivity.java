@@ -1,6 +1,7 @@
 package se.umu.gaan0015.greed;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -33,33 +34,39 @@ public class GreedActivity extends ActionBarActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_greed);
+
+        if(getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT) {
+            setContentView(R.layout.activity_greedportrait);
+        } else{
+            setContentView(R.layout.activity_greedlandscape);
+        }
         initiateComponents();
         System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: Tjataj");
-        if(this.gameModel == null){
-            ArrayList<String> names = null;
-            //Handle the players retrieved from addplayers.
-            if(getIntent().getExtras()!=null) {
-                names = getIntent().getExtras().getStringArrayList(getString(R.string.intent_players));
-            }
 
-            try{
-                addListeners();
-                this.gameModel = new GreedModel(names, 300);
-
-                updateInformation();
-                updateDices(this.gameModel.getCurrentPlayer());
-                showToast(R.string.game_start);
-            }catch(IllegalArgumentException iaE){
-                // When this hits: click "New Game" again
-            }
-            prepareButtons();
+        ArrayList<String> names = null;
+        //Handle the players retrieved from addplayers.
+        if(getIntent().getExtras()!=null) {
+            names = getIntent().getExtras().getStringArrayList(getString(R.string.intent_players));
         }
+
+        try{
+            this.gameModel = new GreedModel(names, 300);
+
+            addListeners();
+            updateInformation();
+            updateDices(this.gameModel.getCurrentPlayer());
+            showToast(R.string.game_start);
+        }catch(IllegalArgumentException iaE){
+            // When this hits: click "New Game" again
+        }
+        prepareButtons();
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+            // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_greed, menu);
         return true;
     }
@@ -69,22 +76,22 @@ public class GreedActivity extends ActionBarActivity {
         super.onPause();
         System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: OnPaused");
 
-    }
+        }
 
-    @Override
-    public void onResume(){
+        @Override
+        public void onResume(){
         super.onResume();
         System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: OnResumed");
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+        public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         // Save UI state changes to the savedInstanceState.
         // This bundle will be passed to onCreate if the process is
         // killed and restarted.
         System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: SaveInstance");
-        savedInstanceState.putParcelable("GREEDMODEL", this.gameModel);
+            savedInstanceState.putParcelable("GREEDMODEL", this.gameModel);
         savedInstanceState.putString("Information", this.informationLabel.getText().toString());
     }
 
@@ -196,7 +203,7 @@ public class GreedActivity extends ActionBarActivity {
             return;
         }
         GreedPlayerModel p = gameModel.getCurrentPlayer();
-        playerLabel.setText(""+p.getName());
+        playerLabel.setText("" + p.getName());
         currentScoreLabel.setText("" + p.getCurrentRoundScore());
         totalScoreLabel.setText("" + p.getScore());
     }
@@ -205,11 +212,27 @@ public class GreedActivity extends ActionBarActivity {
      * Prepares the buttons for a game or not.
      */
     private void prepareButtons(){
-        // Enable/disable buttons
         this.setEnabledScoreSelection(false);
         this.saveButton.setEnabled(false);
-        this.throwButton.setEnabled(!(gameModel == null ||
-                gameModel.getState() == GreedModel.GreedEnum.GAMEOVER));
+        this.throwButton.setEnabled(false);
+
+        if(gameModel == null) {return;}
+
+        switch (gameModel.getState()){
+            case INVALIDMOVE:
+            case DICETHROWN:
+            case NEWPLAYERTHROWN:
+                this.setEnabledScoreSelection(true);
+                break;
+            case CONTINUE:
+                this.saveButton.setEnabled(gameModel.playerCanSave());
+            case NEWPLAYER:
+            case NEWDICE:
+                this.throwButton.setEnabled(true);
+                break;
+            case GAMEOVER:
+                break;
+        }
     }
 
     /*
@@ -262,11 +285,9 @@ public class GreedActivity extends ActionBarActivity {
                 case CONTINUE:
                 case NEWDICE:
                 {
-                    saveButton.setEnabled(gameModel.playerCanSave());
-                    throwButton.setEnabled(true);
                     updateInformation();
                     updateDices(player);
-                    setEnabledScoreSelection(false);
+                    prepareButtons();
                     break;
                 }
             }
@@ -280,16 +301,7 @@ public class GreedActivity extends ActionBarActivity {
         public void onClick(View v){
             String s = gameModel.saveAction(getApplicationContext());
             showToast(s);
-            switch (gameModel.getState()) {
-                case GAMEOVER:
-                    throwButton.setEnabled(false);
-                    break;
-                case NEWPLAYER:
-                    throwButton.setEnabled(true);
-                    break;
-            }
-            saveButton.setEnabled(false);
-            setEnabledScoreSelection(false);
+            prepareButtons();
             updateInformation();
         }
     }
@@ -305,14 +317,10 @@ public class GreedActivity extends ActionBarActivity {
             switch (gameModel.getState()) {
                 case DICETHROWN:
                 case NEWPLAYERTHROWN:
-                    throwButton.setEnabled(false);
-                    setEnabledScoreSelection(true);
-                    saveButton.setEnabled(false);
-                    updateDices(player);
-                    break;
                 case NEWPLAYER:
                     updateInformation();
                     updateDices(player);
+                    prepareButtons();
                     break;
             }
         }

@@ -44,6 +44,23 @@ public class AddPlayersActivity extends ActionBarActivity{
         return true;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putStringArrayList("NAMES", this.names);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore UI state from the savedInstanceState.
+        // This bundle has also been passed to onCreate.
+        this.names = savedInstanceState.getStringArrayList("NAMES");
+        initiateComponents();
+    }
 
 
     @Override
@@ -61,6 +78,9 @@ public class AddPlayersActivity extends ActionBarActivity{
         return super.onOptionsItemSelected(item);
     }
 
+
+
+
     private void initiateComponents(){
         //Initialize components.
         nameList = (ListView)findViewById(R.id.nameListView);
@@ -68,10 +88,9 @@ public class AddPlayersActivity extends ActionBarActivity{
         remB = (Button)findViewById(R.id.addPlayer_buttonRemove);
         startGame = (Button)findViewById(R.id.addPlayer_start);
         editName = (EditText)findViewById(R.id.addPlayer_editText);
-
-        addB.setEnabled(false);
-        remB.setEnabled(false);
-        startGame.setEnabled(false);
+        addB.setEnabled(editName.getText().length()>0);
+        remB.setEnabled(names.size()>0);
+        startGame.setEnabled(names.size()>=2);
         adapter = new ArrayAdapter<>(getApplicationContext(),R.layout.name_listview_item, R.id.namelistViewItemcontent, names);
         nameList.setAdapter(adapter);
 
@@ -130,5 +149,6 @@ public class AddPlayersActivity extends ActionBarActivity{
                 startActivity(intent);
             }
         });
+
     }
 }
