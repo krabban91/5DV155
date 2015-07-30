@@ -1,10 +1,14 @@
-package com.example.gabriel.greed;
+package se.umu.gaan0015.greed;
+
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by Gabriel on 6/15/2015.
- * Describes a dice in the game Greed
+ * Describes a dice in the game GreedActivity
  */
-public class Dice {
+public class DieModel implements Parcelable {
 
     private int sideUp;
     private boolean active = true;
@@ -13,12 +17,12 @@ public class Dice {
     /**
      * Creates an instance of a dice. Also rolls it once.
      */
-    public Dice(){
+    public DieModel(){
         rollDice();
     }
 
     /**
-     * Gives a boolean. Is this Dice selected (yes, no?)
+     * Gives a boolean. Is this DieModel selected (yes, no?)
      * @return <tt>true</tt> if selected by player
      */
     public boolean isSelected(){return selected;}
@@ -46,7 +50,7 @@ public class Dice {
     }
 
     /**
-     * Gives a boolean. Is this Dice active (yes, no?)
+     * Gives a boolean. Is this DieModel active (yes, no?)
      * @return <tt>true</tt> if dice still is in game.
      */
     public boolean isActive(){ return active;}
@@ -76,42 +80,40 @@ public class Dice {
         return getValue();
     }
 
-    /**
-     * Gives the resid for the image that can represent the state of the dice.
-     * @return The resid to use to find a drawable
-     */
-    public int getImageNo(){
-        return isActive() ? (isSelected()?
-                Dice.imgSeleceted[getValue()-1] :
-                    Dice.imgActive[getValue()-1]) :
-                Dice.imgInactive[this.getValue()-1];
+
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.sideUp);
+        dest.writeInt(this.active ? 1 : 0);
+        dest.writeInt(this.selected ? 1 : 0);
+    }
+
+    public static final Parcelable.Creator<DieModel> CREATOR
+            = new Parcelable.Creator<DieModel>() {
+        public DieModel createFromParcel(Parcel in) {
+            return new DieModel(in);
+        }
+
+        public DieModel[] newArray(int size) {
+            return new DieModel[size];
+        }
+    };
+
+    /** recreate object from parcel */
+    private DieModel(Parcel in) {
+        this.sideUp = in.readInt();
+        this.active = in.readInt() == 1;
+        this.selected = in.readInt() == 1;
+    }
+
 
     //--------------------------------------------------
 
-    //Static variables for internal use. Good to have.
-    private static final int[] imgActive = {
-            R.drawable.white1,
-            R.drawable.white2,
-            R.drawable.white3,
-            R.drawable.white4,
-            R.drawable.white5,
-            R.drawable.white6
-    };
-    private static final int[] imgInactive = {
-            R.drawable.grey1,
-            R.drawable.grey2,
-            R.drawable.grey3,
-            R.drawable.grey4,
-            R.drawable.grey5,
-            R.drawable.grey6
-    };
-    private static final int[] imgSeleceted = {
-            R.drawable.red1,
-            R.drawable.red2,
-            R.drawable.red3,
-            R.drawable.red4,
-            R.drawable.red5,
-            R.drawable.red6
-    };
+
 }

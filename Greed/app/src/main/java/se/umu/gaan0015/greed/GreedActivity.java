@@ -1,4 +1,4 @@
-package com.example.gabriel.greed;
+package se.umu.gaan0015.greed;
 
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -10,22 +10,24 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import java.util.ArrayList;
 
 
-public class Greed extends ActionBarActivity {
+public class GreedActivity extends ActionBarActivity {
     //Graphical items.
     private static Toast toast;
+
     private Button[] diceButtons = new Button[6];
     private Button saveButton, scoreButton, throwButton;
-    private TextView playerLabel, currentScoreLabel, totalScoreLabel;
+    private TextView informationLabel, playerLabel, currentScoreLabel, totalScoreLabel;
 
     // The game model
     private GreedModel gameModel;
 
     @Override
     protected void onDestroy(){
-
+        super.onDestroy();
     }
 
     @Override
@@ -33,23 +35,26 @@ public class Greed extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_greed);
         initiateComponents();
-        ArrayList<String> names = null;
-        //Handle the players retrieved from addplayers.
-        if(getIntent().getExtras()!=null) {
-            names = getIntent().getExtras().getStringArrayList(getString(R.string.intent_players));
-        }
+        System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: Tjataj");
+        if(this.gameModel == null){
+            ArrayList<String> names = null;
+            //Handle the players retrieved from addplayers.
+            if(getIntent().getExtras()!=null) {
+                names = getIntent().getExtras().getStringArrayList(getString(R.string.intent_players));
+            }
 
-        try{
-            this.gameModel = new GreedModel(names, 300);
+            try{
+                addListeners();
+                this.gameModel = new GreedModel(names, 300);
 
-            addListeners();
-            updateInformation();
-            updateDices();
-            showToast(R.string.game_start);
-        }catch(IllegalArgumentException iaE){
-            // When this hits: click "New Game" again
+                updateInformation();
+                updateDices(this.gameModel.getCurrentPlayer());
+                showToast(R.string.game_start);
+            }catch(IllegalArgumentException iaE){
+                // When this hits: click "New Game" again
+            }
+            prepareButtons();
         }
-        prepareButtons();
     }
 
     @Override
@@ -59,6 +64,45 @@ public class Greed extends ActionBarActivity {
         return true;
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
+        System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: OnPaused");
+
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: OnResumed");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: SaveInstance");
+        savedInstanceState.putParcelable("GREEDMODEL", this.gameModel);
+        savedInstanceState.putString("Information", this.informationLabel.getText().toString());
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore UI state from the savedInstanceState.
+        // This bundle has also been passed to onCreate.
+        System.out.println("DUUUUUUUUUUUUUUUUUUUUUUUUUUUUUD: RestoreInstance");
+        this.gameModel = savedInstanceState.getParcelable("GREEDMODEL");
+        this.informationLabel.setText(savedInstanceState.getString("Information"));
+        if(this.gameModel != null) {
+            updateInformation();
+            updateDices(this.gameModel.getCurrentPlayer());
+            addListeners();
+            prepareButtons();
+        }
+    }
 
 
     @Override
@@ -70,7 +114,7 @@ public class Greed extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.new_game_button) {
-            Intent intent = new Intent(this, AddPlayers.class);
+            Intent intent = new Intent(this, AddPlayersActivity.class);
             startActivity(intent);
             return true;
         }
@@ -95,13 +139,14 @@ public class Greed extends ActionBarActivity {
     private void showToast(String s){
         if(s == null){ return; }
 
-        if(Greed.toast!= null){
-            Greed.toast.cancel();
+        if(GreedActivity.toast!= null){
+            GreedActivity.toast.cancel();
         }
+        this.informationLabel.setText(s);
+        //TODO Update label
+        //GreedActivity.toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
 
-        Greed.toast = Toast.makeText(getApplicationContext(),s, Toast.LENGTH_SHORT);
-
-        Greed.toast.show();
+        //GreedActivity.toast.show();
     }
 
     /**
@@ -109,7 +154,7 @@ public class Greed extends ActionBarActivity {
      */
     private void addListeners(){
         for (int i = 0; i <diceButtons.length ; i++) {
-            diceButtons[i].setOnClickListener(new DiceClickListener(this.gameModel, i, diceButtons[i]));
+            diceButtons[i].setOnClickListener(new DieClickListener(this.gameModel, i, diceButtons[i]));
         }
         saveButton.setOnClickListener(new OnSaveClickListener());
 
@@ -132,12 +177,14 @@ public class Greed extends ActionBarActivity {
     /**
      * Updates the background resource of all the dice buttons.
      */
-    private  void updateDices(){
-        if(gameModel == null){
+    private  void updateDices(GreedPlayerModel p){
+        if(p == null){
             return;
         }
         for (int i = 0; i <diceButtons.length ; i++) {
-            diceButtons[i].setBackgroundResource(gameModel.getCurrentPlayer().getImgNoForDice(i));
+            DieModel d = p.getDie(i);
+            int imageNo = getImageNoForDie(d);
+            diceButtons[i].setBackgroundResource(imageNo);
         }
     }
 
@@ -148,7 +195,7 @@ public class Greed extends ActionBarActivity {
         if(gameModel == null){
             return;
         }
-        GreedPlayer p = gameModel.getCurrentPlayer();
+        GreedPlayerModel p = gameModel.getCurrentPlayer();
         playerLabel.setText(""+p.getName());
         currentScoreLabel.setText("" + p.getCurrentRoundScore());
         totalScoreLabel.setText("" + p.getScore());
@@ -170,17 +217,26 @@ public class Greed extends ActionBarActivity {
      */
     private void initiateComponents(){
         //labels
+        this.informationLabel = (TextView) findViewById(R.id.informationText);
         this.playerLabel = (TextView) findViewById(R.id.playerValue);
         this.currentScoreLabel = (TextView) findViewById(R.id.scoreValue);
         this.totalScoreLabel = (TextView) findViewById(R.id.totalscoreValue);
         // -------------
-        // Dice buttons
+        // DieModel buttons
         this.diceButtons[0] = (Button) findViewById(R.id.imageButton00);
         this.diceButtons[1] = (Button) findViewById(R.id.imageButton01);
         this.diceButtons[2] = (Button) findViewById(R.id.imageButton02);
         this.diceButtons[3] = (Button) findViewById(R.id.imageButton10);
         this.diceButtons[4] = (Button) findViewById(R.id.imageButton11);
         this.diceButtons[5] = (Button) findViewById(R.id.imageButton12);
+        this.diceButtons[0].setEnabled(false);
+        this.diceButtons[1].setEnabled(false);
+        this.diceButtons[2].setEnabled(false);
+        this.diceButtons[3].setEnabled(false);
+        this.diceButtons[4].setEnabled(false);
+        this.diceButtons[5].setEnabled(false);
+
+
         // -------------
         // Action buttons
         this.saveButton = (Button) findViewById(R.id.greed_save);
@@ -195,6 +251,7 @@ public class Greed extends ActionBarActivity {
 
         @Override
         public void onClick(View v) {
+            GreedPlayerModel player = gameModel.getCurrentPlayer();
             String s = gameModel.scoreAction(getApplicationContext());
             showToast(s);
             switch (gameModel.getState()){
@@ -208,7 +265,7 @@ public class Greed extends ActionBarActivity {
                     saveButton.setEnabled(gameModel.playerCanSave());
                     throwButton.setEnabled(true);
                     updateInformation();
-                    updateDices();
+                    updateDices(player);
                     setEnabledScoreSelection(false);
                     break;
                 }
@@ -242,16 +299,59 @@ public class Greed extends ActionBarActivity {
     private class OnThrowClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            GreedPlayerModel player = gameModel.getCurrentPlayer();
             String s = gameModel.throwAction(getApplicationContext());
             showToast(s);
             switch (gameModel.getState()) {
                 case DICETHROWN:
+                case NEWPLAYERTHROWN:
                     throwButton.setEnabled(false);
                     setEnabledScoreSelection(true);
                     saveButton.setEnabled(false);
-                    updateDices();
+                    updateDices(player);
+                    break;
+                case NEWPLAYER:
+                    updateInformation();
+                    updateDices(player);
                     break;
             }
         }
     }
+
+    /**
+     * Gives the resid for the image that can represent the state of the dice.
+     * @return The resid to use to find a drawable
+     */
+    public int getImageNoForDie(DieModel d){
+        return d.isActive() ? (d.isSelected()?
+                imgSeleceted[d.getValue()-1] :
+                imgActive[d.getValue()-1]) :
+                imgInactive[d.getValue()-1];
+    }
+
+    //Static variables for internal use. Good to have.
+    private static final int[] imgActive = {
+            R.drawable.white1,
+            R.drawable.white2,
+            R.drawable.white3,
+            R.drawable.white4,
+            R.drawable.white5,
+            R.drawable.white6
+    };
+    private static final int[] imgInactive = {
+            R.drawable.grey1,
+            R.drawable.grey2,
+            R.drawable.grey3,
+            R.drawable.grey4,
+            R.drawable.grey5,
+            R.drawable.grey6
+    };
+    private static final int[] imgSeleceted = {
+            R.drawable.red1,
+            R.drawable.red2,
+            R.drawable.red3,
+            R.drawable.red4,
+            R.drawable.red5,
+            R.drawable.red6
+    };
 }

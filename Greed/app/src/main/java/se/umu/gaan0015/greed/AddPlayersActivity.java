@@ -1,4 +1,4 @@
-package com.example.gabriel.greed;
+package se.umu.gaan0015.greed;
 
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -19,7 +21,7 @@ import java.util.LinkedList;
 /**
  * Activity used to find out who that is playing.
  */
-public class AddPlayers extends ActionBarActivity{
+public class AddPlayersActivity extends ActionBarActivity{
     private ArrayAdapter<String> adapter;
     private Button addB, remB, startGame;
     private EditText editName;
@@ -31,9 +33,10 @@ public class AddPlayers extends ActionBarActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_players);
-
+        initiateComponents();
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -69,7 +72,7 @@ public class AddPlayers extends ActionBarActivity{
         addB.setEnabled(false);
         remB.setEnabled(false);
         startGame.setEnabled(false);
-        adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.support_simple_spinner_dropdown_item, names);
+        adapter = new ArrayAdapter<>(getApplicationContext(),R.layout.name_listview_item, R.id.namelistViewItemcontent, names);
         nameList.setAdapter(adapter);
 
         addB.setOnClickListener(new View.OnClickListener() {
@@ -120,8 +123,8 @@ public class AddPlayers extends ActionBarActivity{
         startGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), Greed.class);
-                LinkedList<GreedPlayer> players = new LinkedList<GreedPlayer>();
+                Intent intent = new Intent(getApplicationContext(), GreedActivity.class);
+                LinkedList<GreedPlayerModel> players = new LinkedList<GreedPlayerModel>();
                 intent.putExtra(getString(R.string.intent_players),names);
 
                 startActivity(intent);

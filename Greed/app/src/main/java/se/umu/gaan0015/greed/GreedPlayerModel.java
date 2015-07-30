@@ -1,25 +1,28 @@
-package com.example.gabriel.greed;
+package se.umu.gaan0015.greed;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by Gabriel on 6/15/2015.
- * Used to represent a contenstant in Greed
+ * Used to represent a contestant in GreedActivity
  */
-public class GreedPlayer {
+public class GreedPlayerModel implements Parcelable{
     //instance variables
     private final String name;
     private int score = 0;
     private int currentRound = 0;
-    private Dice[] dices = new Dice[6];
+    private DieModel[] dice = new DieModel[6];
     //--------------
 
     /**
      * Constructor. Creates an instance.
      * @param name The name of the contestant.
      */
-    public GreedPlayer(String name){
+    public GreedPlayerModel(String name){
         this.name = name;
         for(int i = 0; i <6; i++){
-            dices[i] = new Dice();
+            dice[i] = new DieModel();
         }
     }
 
@@ -43,23 +46,23 @@ public class GreedPlayer {
      * @return <tt>true</tt> if action was performable.
      */
     public boolean toggleDiceSelected(int index) {
-        return dices[index].toggleSelected();
+        return dice[index].toggleSelected();
     }
 
     /**
-     * Gives the resid for the image that can represent the state of the dice.
-     * @param index index of the dice.
-     * @return The resid to use to find a drawable
+     * Gives the die with given index.
+     * @param index index of the die.
+     * @return The die
      */
-    public int getImgNoForDice(int index){
-        return dices[index].getImageNo();
+    public DieModel getDie(int index){
+        return dice[index];
     }
 
     /**
-     * Performs the action rollDice for all active dices.
+     * Performs the action rollDice for all active dice.
      */
     public void rollDices(){
-        for(Dice d : dices){
+        for(DieModel d : dice){
             if(d.isActive()){
                 d.rollDice();
             }
@@ -67,18 +70,57 @@ public class GreedPlayer {
     }
 
     /**
-     * Gives a boolean value if there are dices left.
+     * Gives a boolean value if there are dice left.
      * @param thatAreNotSelected <tt>true</tt> if there is to be an deeper check of nonselected dice.
-     * @return <tt>true</tt> if there are any dices left.
+     * @return <tt>true</tt> if there are any dice left.
      */
     public boolean hasDicesLeft(boolean thatAreNotSelected){
-        for (Dice d : dices){
+        for (DieModel d : dice){
             if (d.isActive() && (thatAreNotSelected ?
                                     !d.isSelected() : true)){
                 return true;
             }
         }
         return false;
+    }
+
+    public int possibleScore(){
+        int[] digits = {0,0,0,0,0,0};
+        for (DieModel d : dice){
+            if(d.isActive()){
+                digits[d.getValue()-1]++;
+            }
+        }
+        int score = 0;
+
+        //Check ladder
+        boolean ladder = true;
+        for (int i = 0; i <6 ; i++) {
+            if(digits[i]!=1){
+                ladder = false;
+                break;
+            }
+        }
+        if(ladder){
+            score = 1000;
+        }else{
+            //Sum up all other kinds of scores
+            for (int i = 0; i < digits.length;i++) {
+                while (digits[i]>0){
+                    if (digits[i] > 2){ //triple
+                        score += (i==0?10:i+1)*100;
+                        digits[i]-=3;
+                    }
+                    else { //single
+                        if (i == 0 || i == 4){
+                            score += (i==0?100:50)*digits[i];
+                        }
+                        digits[i]=0;
+                    }
+                }
+            }
+        }
+        return score;
     }
 
     /**
@@ -88,7 +130,7 @@ public class GreedPlayer {
     public int collectScore(){
         //calculate score
         int[] digits = {0,0,0,0,0,0};
-        for (Dice d : dices){
+        for (DieModel d : dice){
             if(d.isSelected()){
                 digits[d.getValue()-1]++;
             }
@@ -116,15 +158,12 @@ public class GreedPlayer {
                     else { //single
                         if (i == 0 || i == 4){
                             throwScore += (i==0?100:50)*digits[i];
-                            digits[i]=0;
                         }else{
                             //Shouldn't be allowed.
                             //selecting something that doesn't award any points.
                             invalidChoice = true;
-                            digits[i]=0;
-                            //return -1;
                         }
-
+                        digits[i]=0;
                     }
                 }
             }
@@ -140,13 +179,13 @@ public class GreedPlayer {
             }
         }
         if(invalidChoice){
-            // Having a score but still selecting more dices.
+            // Having a score but still selecting more dice.
             // u stupid?
             return -1;
         }
 
-        //remove dices
-        for (Dice d : dices){
+        //remove dice
+        for (DieModel d : dice){
             if(d.isSelected()){
                 d.setSelected(false);
                 d.setActive(false);
@@ -157,7 +196,7 @@ public class GreedPlayer {
     }
 
     /**
-     * Starts a new round for the player. resets the dices and current round score.
+     * Starts a new round for the player. resets the dice and current round score.
      */
     public void startRound(){
         currentRound = 0;
@@ -177,10 +216,10 @@ public class GreedPlayer {
 
     /**
      * Sets the dice to active or inactive depending to param {on}
-     * @param on <tt>true</tt> if dices are to be active.
+     * @param on <tt>true</tt> if dice are to be active.
      */
     public void turnDices(boolean on){
-        for(Dice d : dices){
+        for(DieModel d : dice){
             d.setActive(on);
             d.setSelected(!on);
         }
@@ -193,4 +232,38 @@ public class GreedPlayer {
     public int getCurrentRoundScore(){
         return this.currentRound;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeInt(this.score);
+        dest.writeInt(this.currentRound);
+        dest.writeParcelableArray(this.dice, 0);
+    }
+
+    public static final Parcelable.Creator<GreedPlayerModel> CREATOR
+            = new Parcelable.Creator<GreedPlayerModel>() {
+        public GreedPlayerModel createFromParcel(Parcel in) {
+            return new GreedPlayerModel(in);
+        }
+
+        public GreedPlayerModel[] newArray(int size) {
+            return new GreedPlayerModel[size];
+        }
+    };
+
+    /** recreate object from parcel */
+    private GreedPlayerModel(Parcel in) {
+        this.name = in.readString();
+        this.score = in.readInt();
+        this.currentRound = in.readInt();
+        this.dice = (DieModel[])in.readParcelableArray(DieModel.class.getClassLoader());
+
+    }
+
 }

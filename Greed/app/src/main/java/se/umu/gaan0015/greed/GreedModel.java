@@ -1,13 +1,17 @@
-package com.example.gabriel.greed;
+package se.umu.gaan0015.greed;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
 
 /**
- * Class to represent the complete game of Greed.
+ * Class to represent the complete game of GreedActivity.
  */
-public class GreedModel {
+public class GreedModel implements Parcelable {
+
     /**
      * Created by Gabriel on 2015-06-24.
      */
@@ -17,11 +21,12 @@ public class GreedModel {
         CONTINUE,       //scoreAction
         NEWDICE,        //scoreAction
         DICETHROWN,     //throwAction
+        NEWPLAYERTHROWN,//throwAction
         GAMEOVER,       //saveAction
     }
     private GreedEnum state;
-    private ArrayList<GreedPlayer> players;
-    private GreedPlayer currentPlayer;
+    private ArrayList<GreedPlayerModel> players;
+    private GreedPlayerModel currentPlayer;
     private int saveLimit;
     private boolean canSave = false;
 
@@ -31,7 +36,7 @@ public class GreedModel {
         }
         players = new ArrayList<>();
         for(String n : names){
-            players.add(new GreedPlayer(n));
+            players.add(new GreedPlayerModel(n));
         }
         currentPlayer = players.get(0);
 
@@ -47,7 +52,7 @@ public class GreedModel {
         return this.state;
     }
 
-    public GreedPlayer getCurrentPlayer(){
+    public GreedPlayerModel getCurrentPlayer(){
         return currentPlayer;
     }
 
@@ -60,9 +65,23 @@ public class GreedModel {
      * @param context a reference to the context to return correct strings.
      * @return The message to give to the user.
      */
-    public String throwAction(Context context){
+    public String throwAction(Context context) {
         currentPlayer.rollDices();
-        this.state = GreedEnum.DICETHROWN;
+
+        int possibleValue = currentPlayer.possibleScore();
+
+        //TODO CHECK IF score is ok. (first round or anything at all)
+        if ((this.state == GreedEnum.NEWPLAYER && possibleValue<300) || possibleValue < 1 ) {
+            //round over
+            currentPlayer.endRound(false);
+            //next player
+            nextPlayer();
+            currentPlayer.startRound();
+            this.state = GreedEnum.NEWPLAYER;
+            return context.getString(R.string.round_fail);
+        }
+        this.state = this.state == GreedEnum.NEWPLAYER ?
+                GreedEnum.NEWPLAYERTHROWN : GreedEnum.DICETHROWN;
         return context.getString(R.string.dice_thrown);
     }
 
@@ -72,8 +91,9 @@ public class GreedModel {
      * @return The message to give to the user.
      * */
     public String scoreAction(Context context){
+
         int val = currentPlayer.collectScore();
-        if (val < 0) {
+        if (val < 0 || (this.state == GreedEnum.NEWPLAYERTHROWN && val < 300)) {
             this.state = GreedEnum.INVALIDMOVE;
             return context.getString(R.string.invalid_move);
             //invalid choice of dice
@@ -108,7 +128,7 @@ public class GreedModel {
      */
     public String saveAction(Context context){
         //Save score.
-        GreedPlayer p = currentPlayer;
+        GreedPlayerModel p = currentPlayer;
         p.endRound(true);
         if(p.getScore()>=10000){
             this.state = GreedEnum.GAMEOVER;
@@ -129,4 +149,48 @@ public class GreedModel {
         currentPlayer = players.get((i+1)%players.size());
         this.canSave = false;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.state.toString());
+        GreedPlayerModel[] model = new GreedPlayerModel[this.players.size()];
+        for (int i = 0; i< this.players.size(); i++){
+            model[i] = this.players.get(i);
+        }
+        dest.writeParcelableArray(model,0);
+        dest.writeInt(this.players.indexOf(this.currentPlayer));
+        dest.writeInt(this.saveLimit);
+        dest.writeInt(this.canSave ? 1 : 0);
+    }
+
+    public static final Parcelable.Creator<GreedModel> CREATOR
+            = new Parcelable.Creator<GreedModel>() {
+        public GreedModel createFromParcel(Parcel in) {
+            return new GreedModel(in);
+        }
+
+        public GreedModel[] newArray(int size) {
+            return new GreedModel[size];
+        }
+    };
+
+    /** recreate object from parcel */
+    private GreedModel(Parcel in) {
+        this.state = GreedEnum.valueOf(in.readString());
+        GreedPlayerModel[] gpms = (GreedPlayerModel[])in.readParcelableArray(GreedPlayerModel.class.getClassLoader());
+        this.players = new ArrayList<>();
+        for(GreedPlayerModel m : gpms){
+            this.players.add(m);
+        }
+        this.currentPlayer = this.players.get(in.readInt());
+        this.saveLimit = in.readInt();
+        this.canSave = in.readInt() == 1;
+    }
+
 }
