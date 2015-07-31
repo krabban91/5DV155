@@ -92,8 +92,8 @@ public class GreedModel implements Parcelable {
      * */
     public String scoreAction(Context context){
 
-        int val = currentPlayer.collectScore();
-        if (val < 0 || (this.state == GreedEnum.NEWPLAYERTHROWN && val < 300)) {
+        int val = currentPlayer.collectScore(state == GreedEnum.NEWPLAYERTHROWN);
+        if (val < 0 ) {
             this.state = GreedEnum.INVALIDMOVE;
             return context.getString(R.string.invalid_move);
             //invalid choice of dice
@@ -151,6 +151,11 @@ public class GreedModel implements Parcelable {
     }
 
 
+
+    /*
+    -------------------------------------------
+    Following is made for saving session between rotations and reactivations.
+    */
     @Override
     public int describeContents() {
         return 0;

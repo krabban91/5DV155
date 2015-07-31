@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 /**
  * Created by Gabriel on 6/15/2015.
- * Used to represent a contestant in GreedActivity
+ * Used to represent a contestant in Greed
  */
 public class GreedPlayerModel implements Parcelable{
     //instance variables
@@ -84,6 +84,10 @@ public class GreedPlayerModel implements Parcelable{
         return false;
     }
 
+    /**
+     * Checks the complete set of dice what the possible score can be.
+     * @return The highest achieveable score with active dice.
+     */
     public int possibleScore(){
         int[] digits = {0,0,0,0,0,0};
         for (DieModel d : dice){
@@ -127,7 +131,7 @@ public class GreedPlayerModel implements Parcelable{
      * Computes the score of current throw, adds it to currentRound and returns the current throw score.
      * @return the score of the current throw.
      */
-    public int collectScore(){
+    public int collectScore(boolean firstRound){
         //calculate score
         int[] digits = {0,0,0,0,0,0};
         for (DieModel d : dice){
@@ -183,6 +187,10 @@ public class GreedPlayerModel implements Parcelable{
             // u stupid?
             return -1;
         }
+        if(firstRound && throwScore < 300){
+            //Score is not above 300.
+            return -1;
+        }
 
         //remove dice
         for (DieModel d : dice){
@@ -233,6 +241,12 @@ public class GreedPlayerModel implements Parcelable{
         return this.currentRound;
     }
 
+
+
+    /*
+        -------------------------------------------
+        Following is made for saving session between rotations and reactivations. 
+     */
     @Override
     public int describeContents() {
         return 0;

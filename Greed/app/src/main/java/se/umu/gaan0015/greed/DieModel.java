@@ -81,7 +81,10 @@ public class DieModel implements Parcelable {
     }
 
 
-
+    /*
+    -------------------------------------------
+    Following is made for saving session between rotations and reactivations.
+    */
     @Override
     public int describeContents() {
         return 0;

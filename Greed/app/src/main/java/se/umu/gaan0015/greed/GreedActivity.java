@@ -277,20 +277,9 @@ public class GreedActivity extends ActionBarActivity {
             GreedPlayerModel player = gameModel.getCurrentPlayer();
             String s = gameModel.scoreAction(getApplicationContext());
             showToast(s);
-            switch (gameModel.getState()){
-                case INVALIDMOVE:
-                    //do nothing
-                    break;
-                case NEWPLAYER:
-                case CONTINUE:
-                case NEWDICE:
-                {
-                    updateInformation();
-                    updateDices(player);
-                    prepareButtons();
-                    break;
-                }
-            }
+            updateInformation();
+            updateDices(player);
+            prepareButtons();
         }
     }
     /**
@@ -314,15 +303,9 @@ public class GreedActivity extends ActionBarActivity {
             GreedPlayerModel player = gameModel.getCurrentPlayer();
             String s = gameModel.throwAction(getApplicationContext());
             showToast(s);
-            switch (gameModel.getState()) {
-                case DICETHROWN:
-                case NEWPLAYERTHROWN:
-                case NEWPLAYER:
-                    updateInformation();
-                    updateDices(player);
-                    prepareButtons();
-                    break;
-            }
+            updateInformation();
+            updateDices(player);
+            prepareButtons();
         }
     }
 
